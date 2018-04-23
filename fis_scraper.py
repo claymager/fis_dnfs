@@ -3,6 +3,7 @@
 import requests
 from bs4 import BeautifulSoup
 import numpy as np
+import re
 
 def time_to_seconds(time_str):
     time = time_str.split(":")
@@ -36,10 +37,31 @@ def get_finish_times(soup):
         finish_times.append(time_to_seconds(time_str))
     return finish_times
 
+def get_dnfs( soup , i ):
+    dnfs = []
+    for elem in soup(text=re.compile(r'Did not finish '+repr(i))):
+        temp = elem.parent.findNextSibling().find_all("td", class_="text-left")
+        for racer in temp:
+            dnfs.append(racer.text.strip())
+    return dnfs
+
 # getFisResults :: FisRaceResults -> FisEvent
 def get_FIS_Results( soup ):
     location = get_location( soup )
     date = get_date( soup )
     is_ladies, event = get_racetype( soup )
+
     finishes = get_finish_times( soup )
-    return ( location, is_ladies, event, date, finishes)
+
+    first_dnfs = get_dnfs( soup, 1)
+    second_dnfs = get_dnfs( soup, 2)
+    finished_runs = 2*len(finishes) + len(second_dnfs)
+    dnf_runs = len(first_dnfs)+len(second_dnfs)
+    finish_rate = dnf_runs / (finished_runs + dnf_runs)
+
+    return ( finish_rate,
+            location,
+            is_ladies,
+            event, 
+            date, 
+            finishes)
