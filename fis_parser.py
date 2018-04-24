@@ -37,6 +37,10 @@ def get_racetype(soup):
     Soup -> (Bool, Str)
     """
     racetype = soup.find("div", class_="racetype").find("h3").text.strip()
+    # added for 18 March 2016 event handling
+    # should be elsewhere
+    if racetype == "Team":
+        return True, "Team"
     is_ladies = "Ladies" in racetype  
     event = racetype[1+racetype.index(" "):]
     return (is_ladies, event)
@@ -52,6 +56,9 @@ def get_finish_times(soup):
     for racer in finishes:
         try:
             time_str = racer.findNextSibling().text
+            if len(time_str.split("."))==3:
+                delim_index = time_str.find(".")
+                time_str = time_str[:delim_index]+":"+time_str[delim_index+1:]
         except AttributeError:
             break # 
         finish_times.append(time_to_seconds(time_str))
@@ -82,12 +89,9 @@ def get_FIS_Results( soup ):
     is_ladies, event = get_racetype( soup )
     if "Cancelled" in event:
         return "Cancelled"
-    if "Training" in event:
-        return "Training"
-    if "Alpine" in event:
-        return "Untracked alpine competition"
-    if "Team" in event:
-        return "Untracked alpine competition"
+    for word in ["Alpine","Team","Event","Parallel","Training"]:
+        if word in event:
+            return "Untracked alpine competition"
 
     location = get_location( soup )
     date = get_date( soup )
