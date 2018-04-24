@@ -84,8 +84,10 @@ def get_FIS_Results( soup ):
         return "Cancelled"
     if "Training" in event:
         return "Training"
-    if "Combined" in event:
-        return "Alpine combined"
+    if "Alpine" in event:
+        return "Untracked alpine competition"
+    if "Team" in event:
+        return "Untracked alpine competition"
 
     location = get_location( soup )
     date = get_date( soup )
