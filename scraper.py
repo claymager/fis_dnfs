@@ -34,6 +34,9 @@ def read_visible_races():
     return output
 
 def get_results_from_driver():
+    """
+    only used in read_visible_races
+    """
     html = driver.page_source
     soup = BeautifulSoup(html,"lxml")
     data = get_FIS_Results(soup)
